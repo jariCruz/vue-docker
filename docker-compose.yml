@@ -1,0 +1,8 @@
+version: "3"
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "8000:8000" # port to be used in browser:port exposed in dockerfile
+    volumes:
+      - ./frontend/:/var/www/html/app
