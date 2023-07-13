@@ -127,13 +127,46 @@ add the service needed for django in docker-compose.yml
 
 create django project named core inside backend
 
--> docker compose run backend django-admin startproject core .
+-> docker compose run --rm backend django-admin startproject core .
 
 (situational)
 when using linux/windows wsl the created django folders ownership is root:root to modify it run this command.
 
 sudo chown -R $USER:$USER backend/core backend/manage.py
 
-
-
 congratulations! you now have vue and django in docker!
+
+now to add app inside your django project simply use this command.
+
+-> docker compose exec backend python manage.py startapp app
+
+change 'app' in the command above to the name you want. I will use app in this example.
+
+(situational)
+when using linux/windows wsl the created python folders ownership is root:root to modify it run this command.
+
+-> sudo chown -R $USER:$USER backend/app
+
+create urls.py inside backend/app
+
+-> touch backend/app/urls.py
+
+add this inside backend/app/urls.py
+
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path("", views.index, name="index"),
+]
+
+modify backend/core/urls.py
+
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path("app/", include("app.urls")),
+    path("admin/", admin.site.urls),
+]

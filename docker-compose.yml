@@ -1,15 +1,49 @@
 version: "3"
+
 services:
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB} #optional (specify default database instead of $POSTGRES_DB)
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+    ports:
+      - "5432:5432"
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_MAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PW}
+    ports:
+      - "5000:80"
+    depends_on:
+      - db
+    restart: always
+
+  backend:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/var/www/html/app
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_NAME=${POSTGRES_DB} #optional (specify default database instead of $POSTGRES_DB)
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+    depends_on:
+      - db
+  
   frontend:
     build: ./frontend
     ports:
-      - "8000:8000" # port to be used in browser:port exposed in dockerfile
+      - "80:80" # port to be used in browser:port exposed in dockerfile
     volumes:
-      - ./frontend/:/var/www/html/app
-  backend:
-    build: ./backend
-    command: python manage.py runserver 0.0.0.0:80
-    volumes:
-      - ./backend/:/var/www/html/app
-    ports:
-      - "80:80"
+      - ./frontend:/var/www/html/app
+    depends_on:
+      - backend
+    restart: always
