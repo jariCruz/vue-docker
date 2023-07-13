@@ -15,9 +15,43 @@ when using linux/windows wsl the created vue project folders ownership is root:r
 
 -> sudo chown -R $USER:$USER frontend (this is the name of vue project folder used in sample.)
 
-2. Run npm install -> docker compose run --rm frontend npm install (you can run this even outside of the frontend folder, reason is because build was already pointing at the frontend folder meaning the npm install will always be run inside it.)
+2. Create Dockerfile inside frontend with this contents in it. -> touch frontend/Dockerfile
 
-3. Modify vite.config.js and package.json
+# Use a Node.js base image
+FROM node:lts
+
+# Set the working directory
+WORKDIR /var/www/html/app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install project dependencies
+RUN npm install
+
+# Copy the rest of the application code
+COPY . .
+
+# Expose the application port
+EXPOSE 8000
+
+# Start the application
+CMD [ "npm", "run", "dev" ]
+
+3. Then create docker-compose.yml at the project's root with this contents in it. -> touch docker-compose.yml
+
+version: "3"
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./frontend/:/var/www/html/app
+
+4. Run npm install -> docker compose run --rm frontend npm install (you can run this even outside of the frontend folder, reason is because build was already pointing at the frontend folder meaning the npm install will always be run inside it.)
+
+5. Modify vite.config.js and package.json
 
 vite.config.js (add server data with port: 8000 <-- this is declared in Dockerfile expose.)
 
@@ -43,44 +77,8 @@ package.json (add --host beside vite in "dev".)
     "preview": "vite preview"
   },
 
-4. Create Dockerfile inside frontend with this contents in it. -> touch frontend/Dockerfile
-
-# Use a Node.js base image
-FROM node:lts
-
-# Set the working directory
-WORKDIR /var/www/html/app
-
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
-# Install project dependencies
-RUN npm install
-
-# Copy the rest of the application code
-COPY . .
-
-# Expose the application port
-EXPOSE 8000
-
-# Start the application
-CMD [ "npm", "run", "dev" ]
-
-5. Then create docker-compose.yml at the project's root with this contents in it. -> touch docker-compose.yml
-
-version: "3"
-services:
-  frontend:
-    build: ./frontend
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./frontend/:/var/www/html/app
-
 6. Build docker compose image. 
 
 -> docker compose build
 
 7. After building it run it using this command. -> docker compose up
-
-8. susunod backend naman 2 am na pala hayup.
