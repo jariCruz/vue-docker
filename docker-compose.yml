@@ -6,3 +6,10 @@ services:
       - "8000:8000" # port to be used in browser:port exposed in dockerfile
     volumes:
       - ./frontend/:/var/www/html/app
+  backend:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:80
+    volumes:
+      - ./backend/:/var/www/html/app
+    ports:
+      - "80:80"

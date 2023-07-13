@@ -4,7 +4,9 @@ Note: [->] is a symbol for command in shell/terminal.
 
 I will guide you on creating this app.
 
-1. Create the vue project named frontend using docker. -> docker run --rm -v "${PWD}:/$(basename `pwd`)" -w "/$(basename `pwd`)" -it node:lts sh -c "npm init vue@latest"
+1. Create the vue project named frontend using docker. 
+
+-> docker run --rm -v "${PWD}:/$(basename `pwd`)" -w "/$(basename `pwd`)" -it node:lts sh -c "npm init vue@latest"
 
 project name: frontend
 
@@ -82,3 +84,56 @@ package.json (add --host beside vite in "dev".)
 -> docker compose build
 
 7. After building it run it using this command. -> docker compose up
+
+Now test the website using the url given!
+
+8. Now its time to create the backend which will be django.
+
+-> mkdir backend
+
+create Dockerfile inside backend
+
+-> touch backend/Dockerfile
+
+put this inside backend/Dockerfile
+
+# syntax=docker/dockerfile:1
+FROM python:3
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+WORKDIR /var/www/html/app
+COPY requirements.txt /var/www/html/app
+RUN pip install -r requirements.txt
+COPY . .
+
+create requirements.txt inside backend
+
+-> touch backend/requirements.txt
+
+put this inside backend/requirements.txt
+
+Django
+djangorestframework
+
+add the service needed for django in docker-compose.yml
+
+ backend:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:80
+    volumes:
+      - ./backend/:/var/www/html/app
+    ports:
+      - "80:80"
+
+create django project named core inside backend
+
+-> docker compose run backend django-admin startproject core .
+
+(situational)
+when using linux/windows wsl the created django folders ownership is root:root to modify it run this command.
+
+sudo chown -R $USER:$USER backend/core backend/manage.py
+
+
+
+congratulations! you now have vue and django in docker!
